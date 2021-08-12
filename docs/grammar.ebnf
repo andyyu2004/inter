@@ -1,0 +1,5 @@
+<expr> ::=
+    | <expr> <binop> <expr>
+    | "(" <expr> ")";
+
+<binop> ::= "+" | "-";

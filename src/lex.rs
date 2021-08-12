@@ -3,16 +3,25 @@ use string_cache::{Atom, EmptyStaticAtomSet};
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Token {
     pub kind: TokenKind,
+    pub lexeme: String,
+}
+
+impl Token {
+    pub const EOF: Self = Token { kind: TokenKind::Eof, lexeme: String::new() };
 }
 
 #[derive(Clone, PartialEq, Eq, Debug)]
 pub enum TokenKind {
-    Integer(u64),
-    Ident(Symbol),
+    Integer,
+    Ident,
     OpenParen,
     CloseParen,
     Plus,
     Minus,
+    Star,
+    Slash,
+    Bang,
+    Eof,
 }
 
 pub type Symbol = Atom<EmptyStaticAtomSet>;
@@ -29,11 +38,10 @@ pub fn lex(src: &str) -> impl Iterator<Item = Token> + '_ {
                 assert!(terminated, "unterminated block comment");
                 return None;
             }
-            rustc_lexer::TokenKind::Ident => TokenKind::Ident(Symbol::from(lexeme)),
+            rustc_lexer::TokenKind::Ident => TokenKind::Ident,
             rustc_lexer::TokenKind::RawIdent => todo!(),
             rustc_lexer::TokenKind::Literal { kind, suffix_start } => match kind {
-                rustc_lexer::LiteralKind::Int { base, empty_int } =>
-                    TokenKind::Integer(lexeme.parse().unwrap()),
+                rustc_lexer::LiteralKind::Int { base, empty_int } => TokenKind::Integer,
                 rustc_lexer::LiteralKind::Float { base, empty_exponent } => todo!(),
                 rustc_lexer::LiteralKind::Char { terminated } => todo!(),
                 rustc_lexer::LiteralKind::Byte { terminated } => todo!(),
@@ -59,22 +67,22 @@ pub fn lex(src: &str) -> impl Iterator<Item = Token> + '_ {
             rustc_lexer::TokenKind::Colon => todo!(),
             rustc_lexer::TokenKind::Dollar => todo!(),
             rustc_lexer::TokenKind::Eq => todo!(),
-            rustc_lexer::TokenKind::Not => todo!(),
+            rustc_lexer::TokenKind::Not => TokenKind::Bang,
             rustc_lexer::TokenKind::Lt => todo!(),
             rustc_lexer::TokenKind::Gt => todo!(),
-            rustc_lexer::TokenKind::Minus => todo!(),
+            rustc_lexer::TokenKind::Minus => TokenKind::Minus,
             rustc_lexer::TokenKind::And => todo!(),
             rustc_lexer::TokenKind::Or => todo!(),
             rustc_lexer::TokenKind::Plus => TokenKind::Plus,
-            rustc_lexer::TokenKind::Star => todo!(),
-            rustc_lexer::TokenKind::Slash => todo!(),
+            rustc_lexer::TokenKind::Star => TokenKind::Star,
+            rustc_lexer::TokenKind::Slash => TokenKind::Slash,
             rustc_lexer::TokenKind::Caret => todo!(),
             rustc_lexer::TokenKind::Percent => todo!(),
             rustc_lexer::TokenKind::Unknown => todo!(),
         };
-        Some(Token { kind })
+        Some(Token { kind, lexeme: lexeme.to_owned() })
     };
-    rustc_lexer::tokenize(src).filter_map(convert_token)
+    rustc_lexer::tokenize(src).filter_map(convert_token).chain(Some(Token::EOF))
 }
 
 #[cfg(test)]
