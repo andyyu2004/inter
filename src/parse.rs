@@ -52,7 +52,7 @@ impl<I: Iterator<Item = Token>> Parser<I> {
         let expr = if self.accept(TokenKind::OpenParen).is_some() {
             let inner_expr = self.parse_expr()?;
             self.expect(TokenKind::CloseParen)?;
-            Expr::Group(inner_expr)
+            return Ok(inner_expr);
         } else if let Some(token) = self.accept(TokenKind::Integer) {
             Expr::Int(token.lexeme.parse().unwrap())
         } else {
@@ -93,3 +93,11 @@ impl<I: Iterator<Item = Token>> Parser<I> {
 
 #[cfg(test)]
 mod tests;
+
+#[macro_export]
+macro_rules! parse_expr {
+    ($src:expr) => {{
+        let tokens = $crate::lex::lex($src);
+        $crate::parse::Parser::new(tokens).parse_expr().unwrap()
+    }};
+}

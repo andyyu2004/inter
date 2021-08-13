@@ -1,9 +1,4 @@
-macro_rules! parse_expr {
-    ($src:expr) => {{
-        let tokens = $crate::lex::lex($src);
-        $crate::parse::Parser::new(tokens).parse_expr().unwrap()
-    }};
-}
+use crate::parse_expr;
 
 #[test]
 fn test_simple_parse() {

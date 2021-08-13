@@ -9,7 +9,6 @@ pub enum Stmt {}
 #[derive(Debug, Clone, PartialEq)]
 pub enum Expr {
     // here just for pretty printing
-    Group(Box<Expr>),
     Bin(Box<Expr>, BinOp, Box<Expr>),
     Unary(UnaryOp, Box<Expr>),
     Int(i64),
